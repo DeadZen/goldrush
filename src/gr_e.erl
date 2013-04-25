@@ -13,7 +13,7 @@
 %% OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 %% @doc Accessor function for goldrush event terms.
--module(gre).
+-module(gr_e).
 
 -export([
     make/2,
@@ -81,15 +81,15 @@ pairs({list, List}) ->
 -ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
 
-gre_test_() ->
-    [?_assert(gre:has(a, gre:make([{a,1}], [list]))),
-     ?_assertNot(gre:has(b, gre:make([{a,1}], [list]))),
-     ?_assertEqual(1, gre:fetch(a, gre:make([{a,1}], [list]))),
-     ?_assertError(badarg, gre:fetch(a, gre:make([], [list]))),
-     ?_assertEqual([], gre:keys(gre:make([], [list]))),
-     ?_assertEqual([a], gre:keys(gre:make([{a,1}], [list]))),
-     ?_assertEqual([a,b], gre:keys(gre:make([{a,1},{b,2}], [list]))),
-     ?_assertEqual([{a,1},{b,2}], gre:pairs(gre:make([{b,2},{a,1}], [list])))
+gr_e_test_() ->
+    [?_assert(gr_e:has(a, gr_e:make([{a,1}], [list]))),
+     ?_assertNot(gr_e:has(b, gr_e:make([{a,1}], [list]))),
+     ?_assertEqual(1, gr_e:fetch(a, gr_e:make([{a,1}], [list]))),
+     ?_assertError(badarg, gr_e:fetch(a, gr_e:make([], [list]))),
+     ?_assertEqual([], gr_e:keys(gr_e:make([], [list]))),
+     ?_assertEqual([a], gr_e:keys(gr_e:make([{a,1}], [list]))),
+     ?_assertEqual([a,b], gr_e:keys(gr_e:make([{a,1},{b,2}], [list]))),
+     ?_assertEqual([{a,1},{b,2}], gr_e:pairs(gr_e:make([{b,2},{a,1}], [list])))
     ].
 
 -endif.

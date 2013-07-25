@@ -31,28 +31,28 @@
 -export_type([op/0]).
 
 %% @doc Test that a field value is less than a term.
--spec lt(atom(), term()) -> op().
+-spec lt(Key::atom(), Term::term()) -> {Key::atom(), '<', Term::term()}.
 lt(Key, Term) when is_atom(Key) ->
     {Key, '<', Term};
 lt(Key, Term) ->
     erlang:error(badarg, [Key, Term]).
 
 %% @doc Test that a field value is equal to a term.
--spec eq(atom(), term()) -> op().
+-spec eq(Key::atom(), Term::term()) -> {Key::atom(), '=', Term::term()}.
 eq(Key, Term) when is_atom(Key) ->
     {Key, '=', Term};
 eq(Key, Term) ->
     erlang:error(badarg, [Key, Term]).
 
 %% @doc Test that a field value is greater than a term.
--spec gt(atom(), term()) -> op().
+-spec gt(Key::atom(), Term::term()) -> {Key::atom(), '>', Term::term()}.
 gt(Key, Term) when is_atom(Key) ->
     {Key, '>', Term};
 gt(Key, Term) ->
     erlang:error(badarg, [Key, Term]).
 
 %% @doc Test that a field value is exists.
--spec wc(atom()) -> op().
+-spec wc(Key::atom()) -> {Key::atom(), '*'}.
 wc(Key) when is_atom(Key) ->
     {Key, '*'};
 wc(Key) ->
@@ -64,7 +64,7 @@ wc(Key) ->
 %% in the list must hold for the input event. The list is expected to
 %% be a non-empty list. If the list of filters is an empty list a `badarg'
 %% error will be thrown.
--spec all([op()]) -> op().
+-spec all(Conds::nonempty_maybe_improper_list()) -> {all, Conds::nonempty_maybe_improper_list()}.
 all([_|_]=Conds) ->
     {all, Conds};
 all(Other) ->
@@ -76,7 +76,7 @@ all(Other) ->
 %% in the list must hold for the input event. The list is expected to be
 %% a non-empty list. If the list of filters is an empty list a `badarg'
 %% error will be thrown.
--spec any([op()]) -> op().
+-spec any(Conds::nonempty_maybe_improper_list()) -> {any, Conds::nonempty_maybe_improper_list()}.
 any([_|_]=Conds) ->
     {any, Conds};
 any(Other) ->
@@ -84,7 +84,7 @@ any(Other) ->
 
 
 %% @doc Always return `true' or `false'.
--spec null(boolean()) -> op().
+-spec null(Result::boolean()) -> {null, Result::boolean()} | no_return().
 null(Result) when is_boolean(Result) ->
     {null, Result};
 null(Result) ->
@@ -95,7 +95,8 @@ null(Result) ->
 %% Updating the output action of a query finalizes it. Attempting
 %% to use a finalized query to construct a new query will result
 %% in a `badarg' error.
--spec with(op(), fun((gre:event()) -> term())) -> op().
+-spec with(Query::op(), Fun::fun((gre:event()) -> term())) ->
+    {with, Query::op(), Fun::fun((gre:event()) -> term())} | no_return().
 with(Query, Fun) when is_function(Fun, 1) ->
     {with, Query, Fun};
 with(Query, Fun) ->
@@ -111,7 +112,7 @@ with(Query, Fun) ->
 %% All queries are expected to be valid and have an output action other
 %% than the default which is `output'. If these expectations don't hold
 %% a `badarg' error will be thrown.
--spec union([op()]) -> op().
+-spec union(Queries::[op()]) -> {union, Queries::[op()]} | no_return().
 union(Queries) ->
     case [Query || Query <- Queries, glc_lib:onoutput(Query) =:= output] of
         [] -> {union, Queries};

@@ -87,7 +87,7 @@
 
 -record(module, {
     'query' :: term(),
-    tables :: [{atom(), ets:tid()}],
+    tables :: [{atom(), ets:tab()}],
     qtree :: term()
 }).
 
@@ -140,7 +140,9 @@ null(Result) ->
 %% Updating the output action of a query finalizes it. Attempting
 %% to use a finalized query to construct a new query will result
 %% in a `badarg' error.
--spec with(glc_ops:op(), fun((gre:event()) -> term())) -> glc_ops:op().
+-type qry() :: {atom(), '*'|false|true|[any(),...]} | {atom(), '<'|'='|'>', _}.
+-type action() :: fun((_) -> any()).
+-spec with(Query::qry(), Action::action()) -> {with, Query::qry(), Action::action()}.
 with(Query, Action) ->
     glc_ops:with(Query, Action).
 

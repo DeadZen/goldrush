@@ -299,7 +299,7 @@ field_variable_([]) ->
 param_variable(Key) ->
     ?erl:variable("Param_" ++ integer_to_list(Key)).
 
-%% @private Generate a list of field variable names.
+%% @ private Generate a list of field variable names.
 %% Walk the query tree and generate a safe variable name string for each field
 %% that is accessed by the conditions in the query. Only allow alpha-numeric.
 %%-spec field_variables(glc_ops:op()) -> [{atom(), string()}].

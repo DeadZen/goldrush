@@ -91,6 +91,11 @@
     qtree :: term()
 }).
 
+-export_type([qry/0, action/0]).
+
+-type qry() :: {atom(), '*'|false|true|[any(),...]} | {atom(), '<'|'='|'>', _}.
+-type action() :: fun((gre:event()) -> any()).
+
 -spec lt(atom(), term()) -> glc_ops:op().
 lt(Key, Term) ->
     glc_ops:lt(Key, Term).
@@ -140,8 +145,6 @@ null(Result) ->
 %% Updating the output action of a query finalizes it. Attempting
 %% to use a finalized query to construct a new query will result
 %% in a `badarg' error.
--type qry() :: {atom(), '*'|false|true|[any(),...]} | {atom(), '<'|'='|'>', _}.
--type action() :: fun((gre:event()) -> any()).
 -spec with(Query::qry(), Action::action()) -> {with, Query::qry(), Action::action()}.
 with(Query, Action) ->
     glc_ops:with(Query, Action).

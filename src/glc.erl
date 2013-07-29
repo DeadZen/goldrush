@@ -141,7 +141,7 @@ null(Result) ->
 %% to use a finalized query to construct a new query will result
 %% in a `badarg' error.
 -type qry() :: {atom(), '*'|false|true|[any(),...]} | {atom(), '<'|'='|'>', _}.
--type action() :: fun((_) -> any()).
+-type action() :: fun((gre:event()) -> any()).
 -spec with(Query::qry(), Action::action()) -> {with, Query::qry(), Action::action()}.
 with(Query, Action) ->
     glc_ops:with(Query, Action).

@@ -93,7 +93,8 @@
 
 -export_type([qry/0, action/0]).
 
--type qry() :: {atom(), '*'|false|true|[any(),...]} | {atom(), '<'|'='|'>', _}.
+%-type qry() :: {atom(), '*'|false|true|[any(),...]} | {atom(), '<'|'='|'>', _}.
+-type qry() :: glc_ops:op().
 -type action() :: fun((gre:event()) -> any()).
 
 -spec lt(atom(), term()) -> glc_ops:op().
@@ -170,7 +171,7 @@ union(Queries) ->
 %% On success the module representing the query is returned. The module and
 %% data associated with the query must be released using the {@link delete/1}
 %% function. The name of the query module is expected to be unique.
--spec compile(atom(), list()) -> {ok, atom()}.
+-spec compile(Module :: atom(), Query :: qry()) -> {ok, atom()}.
 compile(Module, Query) ->
     {ok, ModuleData} = module_data(Query),
     case glc_code:compile(Module, ModuleData) of

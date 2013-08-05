@@ -87,6 +87,7 @@ repeat(Query, Fun) ->
 
 
 %% @doc Return the output action of a query.
+-spec onoutput ({_, '<'|'='|'>', _} | {_,'*'}) -> output.
 onoutput({_, '<', _}) ->
     output;
 onoutput({_, '=', _}) ->
@@ -99,6 +100,7 @@ onoutput(Query) ->
     erlang:error(badarg, [Query]).
 
 %% @doc Modify the output action of a query.
+-spec onoutput (term(), term()) -> no_return().
 onoutput(Action, Query) ->
     erlang:error(badarg, [Action, Query]).
 

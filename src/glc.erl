@@ -87,9 +87,15 @@
 
 -record(module, {
     'query' :: term(),
-    tables :: [{atom(), ets:tid()}],
+    tables :: [{atom(), ets:tab()}],
     qtree :: term()
 }).
+
+-export_type([qry/0, action/0]).
+
+%-type qry() :: {atom(), '*'|false|true|[any(),...]} | {atom(), '<'|'='|'>', _}.
+-type qry() :: glc_ops:op().
+-type action() :: fun((gre:event()) -> any()).
 
 -spec lt(atom(), term()) -> glc_ops:op().
 lt(Key, Term) ->
@@ -140,7 +146,7 @@ null(Result) ->
 %% Updating the output action of a query finalizes it. Attempting
 %% to use a finalized query to construct a new query will result
 %% in a `badarg' error.
--spec with(glc_ops:op(), fun((gre:event()) -> term())) -> glc_ops:op().
+-spec with(Query::qry(), Action::action()) -> {with, Query::qry(), Action::action()}.
 with(Query, Action) ->
     glc_ops:with(Query, Action).
 
@@ -165,7 +171,7 @@ union(Queries) ->
 %% On success the module representing the query is returned. The module and
 %% data associated with the query must be released using the {@link delete/1}
 %% function. The name of the query module is expected to be unique.
--spec compile(atom(), list()) -> {ok, atom()}.
+-spec compile(Module :: atom(), Query :: qry()) -> {ok, atom()}.
 compile(Module, Query) ->
     {ok, ModuleData} = module_data(Query),
     case glc_code:compile(Module, ModuleData) of

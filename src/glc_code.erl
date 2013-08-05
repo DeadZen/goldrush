@@ -9,9 +9,10 @@
 
 -record(module, {
     'query' :: term(),
-    tables :: [{atom(), ets:tid()}],
+    tables :: [{atom(), ets:tab()}],
     qtree :: term()
 }).
+-type mod() :: #module{}.
 
 -type syntaxTree() :: erl_syntax:syntaxTree().
 
@@ -20,11 +21,12 @@
     fields = [] :: [{atom(), syntaxTree()}],
     fieldc = 0 :: non_neg_integer(),
     paramvars = [] :: [{term(), syntaxTree()}],
-    paramstab = undefined :: ets:tid()
+    paramstab = undefined :: ets:tab()
 }).
 
 -type nextFun() :: fun((#state{}) -> [syntaxTree()]).
 
+-spec compile (Module::atom(), mod()) -> {ok, Module::atom()}.
 compile(Module, ModuleData) ->
     {ok, forms, Forms} = abstract_module(Module, ModuleData),
     {ok, Module, Binary} = compile_forms(Forms, [nowarn_unused_vars]),
@@ -67,6 +69,9 @@ abstract_module_(Module, #module{tables=Tables, qtree=Tree}=Data) ->
             ?erl:atom(handle),
             ?erl:integer(1))])]),
      %% ]).
+     %% -spec info([
+     %% TODO
+     %% ]).
      %% info(Name) -> Term.
      ?erl:function(
         ?erl:atom(info),
@@ -74,13 +79,19 @@ abstract_module_(Module, #module{tables=Tables, qtree=Tree}=Data) ->
         [?erl:clause(
             [?erl:underscore()], none,
                 [abstract_apply(erlang, error, [?erl:atom(badarg)])])]),
-     %% table(Name) -> ets:tid().
+     %% -spec table([
+     %% TODO
+     %% ]).
+     %% table(Name) -> ets:tab().
      ?erl:function(
         ?erl:atom(table),
         abstract_tables(Tables) ++
         [?erl:clause(
          [?erl:underscore()], none,
             [abstract_apply(erlang, error, [?erl:atom(badarg)])])]),
+     %% -spec handle([
+     %% TODO
+     %% ]).
      %% handle(Event) - entry function
      ?erl:function(
        ?erl:atom(handle),
@@ -88,7 +99,10 @@ abstract_module_(Module, #module{tables=Tables, qtree=Tree}=Data) ->
          [abstract_count(input),
           ?erl:application(none,
             ?erl:atom(handle_), [?erl:variable("Event")])])]),
-     %% input_(Node, App, Pid, Tags, Values) - filter roots
+     %% -spec handle_([
+     %% TODO
+     %% ]).
+     %% handle_(Node, App, Pid, Tags, Values) - filter roots
      ?erl:function(
         ?erl:atom(handle_),
         [?erl:clause([?erl:variable("Event")], none,
@@ -103,10 +117,14 @@ abstract_module_(Module, #module{tables=Tables, qtree=Tree}=Data) ->
     AbstractMod.
 
 %% @private Return the clauses of the table/1 function.
+%-spec abstract_tables([{term(), atom()|binary()|maybe_improper_list()|number()|tuple()}]) ->
+%    ?erl:syntax_tree().
 abstract_tables(Tables) ->
     [?erl:clause(
         [?erl:abstract(K)], none,
         [?erl:abstract(V)])
+%        [?erl:tree(variable,V)])
+%        [?erl:variable("V")])
     || {K, V} <- Tables].
 
 %% @private Return the clauses of the info/1 function.
@@ -277,7 +295,7 @@ abstract_getparam_(Term, OnBound, #state{paramstab=Table,
     ] ++ OnBound(State#state{paramvars=[{Term, param_variable(Key)}|Params]}).
 
 %% @private Generate a variable name for the value of a field.
--spec field_variable(atom()) -> string().
+-spec field_variable(atom()) -> nonempty_string().
 field_variable(Key) ->
     "Field_" ++ field_variable_(atom_to_list(Key)).
 
@@ -299,22 +317,10 @@ field_variable_([]) ->
 param_variable(Key) ->
     ?erl:variable("Param_" ++ integer_to_list(Key)).
 
-%% @private Generate a list of field variable names.
-%% Walk the query tree and generate a safe variable name string for each field
-%% that is accessed by the conditions in the query. Only allow alpha-numeric.
-%%-spec field_variables(glc_ops:op()) -> [{atom(), string()}].
-%%field_variables(Query) ->
-%%    lists:usort(field_variables_(Query)).
-
-%%-spec field_variables(glc_ops:op()) -> [{atom(), string()}].
-%%field_variables_({Key, '=', _Term}) ->
-%%    [{Key, field_variable(Key)}].
-
-
 
 %% @private Return an expression to increment a counter.
 %% @todo Pass state record. Only Generate code if `statistics' is enabled.
--spec abstract_count(atom()) -> syntaxTree().
+-spec abstract_count(filter|input|output) -> syntaxTree().
 abstract_count(Counter) ->
     abstract_apply(ets, update_counter,
         [abstract_apply(table, [?erl:atom(counters)]),
@@ -324,7 +330,7 @@ abstract_count(Counter) ->
 
 %% @private Return an expression to get the value of a counter.
 %% @todo Pass state record. Only Generate code if `statistics' is enabled.
--spec abstract_getcount(atom()) -> [syntaxTree()].
+-spec abstract_getcount(filter|input|output) -> [syntaxTree()].
 abstract_getcount(Counter) ->
     [abstract_apply(ets, lookup_element,
         [abstract_apply(table, [?erl:atom(counters)]),
@@ -356,11 +362,15 @@ load_binary(Module, Binary) ->
     end.
 
 %% @private Apply an exported function.
--spec abstract_apply(atom(), atom(), [syntaxTree()]) -> syntaxTree().
+% underspec: -spec abstract_apply(atom(), atom(), [syntaxTree()]) -> syntaxTree().
+-spec abstract_apply(erlang|ets|gre, '<'|'=:='|'>'|error|find|lookup_element|update_counter, [any(),...]) ->
+    syntaxTree().
 abstract_apply(Module, Function, Arguments) ->
     ?erl:application(?erl:atom(Module), ?erl:atom(Function), Arguments).
 
 %% @private Apply a module local function.
--spec abstract_apply(atom(), [syntaxTree()]) -> syntaxTree().
+% underspec: -spec abstract_apply(atom(), [syntaxTree()]) -> syntaxTree().
+-spec abstract_apply (table, [{tree, atom(), {_,_,_,_}, _}, ...]) ->
+    syntaxTree().
 abstract_apply(Function, Arguments) ->
     ?erl:application(?erl:atom(Function), Arguments).

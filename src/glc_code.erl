@@ -69,6 +69,9 @@ abstract_module_(Module, #module{tables=Tables, qtree=Tree}=Data) ->
             ?erl:atom(handle),
             ?erl:integer(1))])]),
      %% ]).
+     %% -spec info([
+     %% TODO
+     %% ]).
      %% info(Name) -> Term.
      ?erl:function(
         ?erl:atom(info),
@@ -76,6 +79,9 @@ abstract_module_(Module, #module{tables=Tables, qtree=Tree}=Data) ->
         [?erl:clause(
             [?erl:underscore()], none,
                 [abstract_apply(erlang, error, [?erl:atom(badarg)])])]),
+     %% -spec table([
+     %% TODO
+     %% ]).
      %% table(Name) -> ets:tab().
      ?erl:function(
         ?erl:atom(table),
@@ -83,6 +89,9 @@ abstract_module_(Module, #module{tables=Tables, qtree=Tree}=Data) ->
         [?erl:clause(
          [?erl:underscore()], none,
             [abstract_apply(erlang, error, [?erl:atom(badarg)])])]),
+     %% -spec handle([
+     %% TODO
+     %% ]).
      %% handle(Event) - entry function
      ?erl:function(
        ?erl:atom(handle),
@@ -90,7 +99,10 @@ abstract_module_(Module, #module{tables=Tables, qtree=Tree}=Data) ->
          [abstract_count(input),
           ?erl:application(none,
             ?erl:atom(handle_), [?erl:variable("Event")])])]),
-     %% input_(Node, App, Pid, Tags, Values) - filter roots
+     %% -spec handle_([
+     %% TODO
+     %% ]).
+     %% handle_(Node, App, Pid, Tags, Values) - filter roots
      ?erl:function(
         ?erl:atom(handle_),
         [?erl:clause([?erl:variable("Event")], none,

@@ -24,27 +24,27 @@
 %%
 %% === Examples of built in filters ===
 %% ```
-%% %% Select all events where 'a' exists and is greater than 0.
-%% glc:gt(a, 0).
+%% %% Select all events where 'a' exists and is gr_eater than 0.
+%% gr_lc:gt(a, 0).
 %% %% Select all events where 'a' exists and is equal to 0.
-%% glc:eq(a, 0).
+%% gr_lc:eq(a, 0).
 %% %% Select all events where 'a' exists and is less than 0.
-%% glc:lt(a, 0).
+%% gr_lc:lt(a, 0).
 %% %% Select all events where 'a' exists and is anything.
-%% glc:wc(a).
+%% gr_lc:wc(a).
 %%
 %% %% Select no input events. Used as black hole query.
-%% glc:null(false).
+%% gr_lc:null(false).
 %% %% Select all input events. Used as passthrough query.
-%% glc:null(true).
+%% gr_lc:null(true).
 %% '''
 %%
 %% === Examples of combining filters ===
 %% ```
-%% %% Select all events where both 'a' and 'b' exists and are greater than 0.
-%% glc:all([glc:gt(a, 0), glc:gt(b, 0)]).
-%% %% Select all events where 'a' or 'b' exists and are greater than 0.
-%% glc:any([glc:get(a, 0), glc:gt(b, 0)]).
+%% %% Select all events where both 'a' and 'b' exists and are gr_eater than 0.
+%% gr_lc:all([gr_lc:gt(a, 0), gr_lc:gt(b, 0)]).
+%% %% Select all events where 'a' or 'b' exists and are gr_eater than 0.
+%% gr_lc:any([gr_lc:get(a, 0), gr_lc:gt(b, 0)]).
 %% '''
 %%
 %% === Handling output events ===
@@ -55,11 +55,11 @@
 %%
 %% ```
 %% %% Write all input events as info reports to the error logger.
-%% glc:with(glc:null(true), fun(E) ->
-%%     error_logger:info_report(gre:pairs(E)) end).
+%% gr_lc:with(gr_lc:null(true), fun(E) ->
+%%     error_logger:info_report(gr_e:pairs(E)) end).
 %% '''
 %%
--module(glc).
+-module(gr_lc).
 
 -export([
     compile/2,
@@ -91,21 +91,21 @@
     qtree :: term()
 }).
 
--spec lt(atom(), term()) -> glc_ops:op().
+-spec lt(atom(), term()) -> gr_lc_ops:op().
 lt(Key, Term) ->
-    glc_ops:lt(Key, Term).
+    gr_lc_ops:lt(Key, Term).
 
--spec eq(atom(), term()) -> glc_ops:op().
+-spec eq(atom(), term()) -> gr_lc_ops:op().
 eq(Key, Term) ->
-    glc_ops:eq(Key, Term).
+    gr_lc_ops:eq(Key, Term).
 
--spec gt(atom(), term()) -> glc_ops:op().
+-spec gt(atom(), term()) -> gr_lc_ops:op().
 gt(Key, Term) ->
-    glc_ops:gt(Key, Term).
+    gr_lc_ops:gt(Key, Term).
 
--spec wc(atom()) -> glc_ops:op().
+-spec wc(atom()) -> gr_lc_ops:op().
 wc(Key) ->
-    glc_ops:wc(Key).
+    gr_lc_ops:wc(Key).
 
 %% @doc Filter the input using multiple filters.
 %%
@@ -113,9 +113,9 @@ wc(Key) ->
 %% in the list must hold for the input event. The list is expected to
 %% be a non-empty list. If the list of filters is an empty list a `badarg'
 %% error will be thrown.
--spec all([glc_ops:op()]) -> glc_ops:op().
+-spec all([gr_lc_ops:op()]) -> gr_lc_ops:op().
 all(Filters) ->
-    glc_ops:all(Filters).
+    gr_lc_ops:all(Filters).
 
 
 %% @doc Filter the input using one of multiple filters.
@@ -124,15 +124,15 @@ all(Filters) ->
 %% in the list must hold for the input event. The list is expected to be
 %% a non-empty list. If the list of filters is an empty list a `badarg'
 %% error will be thrown.
--spec any([glc_ops:op()]) -> glc_ops:op().
+-spec any([gr_lc_ops:op()]) -> gr_lc_ops:op().
 any(Filters) ->
-    glc_ops:any(Filters).
+    gr_lc_ops:any(Filters).
 
 
 %% @doc Always return `true' or `false'.
--spec null(boolean()) -> glc_ops:op().
+-spec null(boolean()) -> gr_lc_ops:op().
 null(Result) ->
-    glc_ops:null(Result).
+    gr_lc_ops:null(Result).
 
 
 %% @doc Apply a function to each output of a query.
@@ -140,9 +140,9 @@ null(Result) ->
 %% Updating the output action of a query finalizes it. Attempting
 %% to use a finalized query to construct a new query will result
 %% in a `badarg' error.
--spec with(glc_ops:op(), fun((gre:event()) -> term())) -> glc_ops:op().
+-spec with(gr_lc_ops:op(), fun((gr_e:event()) -> term())) -> gr_lc_ops:op().
 with(Query, Action) ->
-    glc_ops:with(Query, Action).
+    gr_lc_ops:with(Query, Action).
 
 
 %% @doc Return a union of multiple queries.
@@ -155,9 +155,9 @@ with(Query, Action) ->
 %% All queries are expected to be valid and have an output action other
 %% than the default which is `output'. If these expectations don't hold
 %% a `badarg' error will be thrown.
--spec union([glc_ops:op()]) -> glc_ops:op().
+-spec union([gr_lc_ops:op()]) -> gr_lc_ops:op().
 union(Queries) ->
-    glc_ops:union(Queries).
+    gr_lc_ops:union(Queries).
 
 
 %% @doc Compile a query to a module.
@@ -168,15 +168,15 @@ union(Queries) ->
 -spec compile(atom(), list()) -> {ok, atom()}.
 compile(Module, Query) ->
     {ok, ModuleData} = module_data(Query),
-    case glc_code:compile(Module, ModuleData) of
+    case gr_lc_code:compile(Module, ModuleData) of
         {ok, Module} ->
             {ok, Module}
     end.
 
 %% @doc Handle an event using a compiled query.
 %%
-%% The input event is expected to have been returned from {@link gre:make/2}.
--spec handle(atom(), gre:event()) -> ok.
+%% The input event is expected to have been returned from {@link gr_e:make/2}.
+-spec handle(atom(), gr_e:event()) -> ok.
 handle(Module, Event) ->
     Module:handle(Event).
 
@@ -206,7 +206,7 @@ module_data(Query) ->
     %% tables are referred to by name in the generated code. the table/1
     %% function maps names to tids.
     Tables = [{params,Params}, {counters,Counters}],
-    Query2 = glc_lib:reduce(Query),
+    Query2 = gr_lc_lib:reduce(Query),
     {ok, #module{'query'=Query, tables=Tables, qtree=Query2}}.
 
 
@@ -247,30 +247,30 @@ setup_query(Module, Query) ->
     {compiled, Module}.
 
 nullquery_compiles_test() ->
-    {compiled, Mod} = setup_query(testmod1, glc:null(false)),
+    {compiled, Mod} = setup_query(testmod1, gr_lc:null(false)),
     ?assertError(badarg, Mod:table(noexists)).
 
 params_table_exists_test() ->
-    {compiled, Mod} = setup_query(testmod2, glc:null(false)),
+    {compiled, Mod} = setup_query(testmod2, gr_lc:null(false)),
     ?assert(is_integer(Mod:table(params))),
     ?assertMatch([_|_], ets:info(Mod:table(params))).
 
 nullquery_exists_test() ->
-    {compiled, Mod} = setup_query(testmod3, glc:null(false)),
+    {compiled, Mod} = setup_query(testmod3, gr_lc:null(false)),
     ?assert(erlang:function_exported(Mod, info, 1)),
     ?assertError(badarg, Mod:info(invalid)),
     ?assertEqual({null, false}, Mod:info('query')).
 
 init_counters_test() ->
-    {compiled, Mod} = setup_query(testmod4, glc:null(false)),
+    {compiled, Mod} = setup_query(testmod4, gr_lc:null(false)),
     ?assertEqual(0, Mod:info(input)),
     ?assertEqual(0, Mod:info(filter)),
     ?assertEqual(0, Mod:info(output)).
 
 filtered_event_test() ->
     %% If no selection condition is specified no inputs can match.
-    {compiled, Mod} = setup_query(testmod5, glc:null(false)),
-    glc:handle(Mod, gre:make([], [list])),
+    {compiled, Mod} = setup_query(testmod5, gr_lc:null(false)),
+    gr_lc:handle(Mod, gr_e:make([], [list])),
     ?assertEqual(1, Mod:info(input)),
     ?assertEqual(1, Mod:info(filter)),
     ?assertEqual(0, Mod:info(output)).
@@ -279,8 +279,8 @@ nomatch_event_test() ->
     %% If a selection condition but no body is specified the event
     %% is expected to count as filtered out if the condition does
     %% not hold.
-    {compiled, Mod} = setup_query(testmod6, glc:eq('$n', 'noexists@nohost')),
-    glc:handle(Mod, gre:make([{'$n', 'noexists2@nohost'}], [list])),
+    {compiled, Mod} = setup_query(testmod6, gr_lc:eq('$n', 'noexists@nohost')),
+    gr_lc:handle(Mod, gr_e:make([{'$n', 'noexists2@nohost'}], [list])),
     ?assertEqual(1, Mod:info(input)),
     ?assertEqual(1, Mod:info(filter)),
     ?assertEqual(0, Mod:info(output)).
@@ -288,8 +288,8 @@ nomatch_event_test() ->
 opfilter_eq_test() ->
     %% If a selection condition but no body is specified the event
     %% counts as input to the query, but not as filtered out.
-    {compiled, Mod} = setup_query(testmod7, glc:eq('$n', 'noexists@nohost')),
-    glc:handle(Mod, gre:make([{'$n', 'noexists@nohost'}], [list])),
+    {compiled, Mod} = setup_query(testmod7, gr_lc:eq('$n', 'noexists@nohost')),
+    gr_lc:handle(Mod, gr_e:make([{'$n', 'noexists@nohost'}], [list])),
     ?assertEqual(1, Mod:info(input)),
     ?assertEqual(0, Mod:info(filter)),
     ?assertEqual(1, Mod:info(output)),
@@ -297,23 +297,23 @@ opfilter_eq_test() ->
 
 
 opfilter_gt_test() ->
-    {compiled, Mod} = setup_query(testmod8, glc:gt(a, 1)),
-    glc:handle(Mod, gre:make([{'a', 2}], [list])),
+    {compiled, Mod} = setup_query(testmod8, gr_lc:gt(a, 1)),
+    gr_lc:handle(Mod, gr_e:make([{'a', 2}], [list])),
     ?assertEqual(1, Mod:info(input)),
     ?assertEqual(0, Mod:info(filter)),
-    glc:handle(Mod, gre:make([{'a', 0}], [list])),
+    gr_lc:handle(Mod, gr_e:make([{'a', 0}], [list])),
     ?assertEqual(2, Mod:info(input)),
     ?assertEqual(1, Mod:info(filter)),
     ?assertEqual(1, Mod:info(output)),
     done.
 
 opfilter_lt_test() ->
-    {compiled, Mod} = setup_query(testmod9, glc:lt(a, 1)),
-    glc:handle(Mod, gre:make([{'a', 0}], [list])),
+    {compiled, Mod} = setup_query(testmod9, gr_lc:lt(a, 1)),
+    gr_lc:handle(Mod, gr_e:make([{'a', 0}], [list])),
     ?assertEqual(1, Mod:info(input)),
     ?assertEqual(0, Mod:info(filter)),
     ?assertEqual(1, Mod:info(output)),
-    glc:handle(Mod, gre:make([{'a', 2}], [list])),
+    gr_lc:handle(Mod, gr_e:make([{'a', 2}], [list])),
     ?assertEqual(2, Mod:info(input)),
     ?assertEqual(1, Mod:info(filter)),
     ?assertEqual(1, Mod:info(output)),
@@ -321,16 +321,16 @@ opfilter_lt_test() ->
 
 allholds_op_test() ->
     {compiled, Mod} = setup_query(testmod10,
-        glc:all([glc:eq(a, 1), glc:eq(b, 2)])),
-    glc:handle(Mod, gre:make([{'a', 1}], [list])),
-    glc:handle(Mod, gre:make([{'a', 2}], [list])),
+        gr_lc:all([gr_lc:eq(a, 1), gr_lc:eq(b, 2)])),
+    gr_lc:handle(Mod, gr_e:make([{'a', 1}], [list])),
+    gr_lc:handle(Mod, gr_e:make([{'a', 2}], [list])),
     ?assertEqual(2, Mod:info(input)),
     ?assertEqual(2, Mod:info(filter)),
-    glc:handle(Mod, gre:make([{'b', 1}], [list])),
-    glc:handle(Mod, gre:make([{'b', 2}], [list])),
+    gr_lc:handle(Mod, gr_e:make([{'b', 1}], [list])),
+    gr_lc:handle(Mod, gr_e:make([{'b', 2}], [list])),
     ?assertEqual(4, Mod:info(input)),
     ?assertEqual(4, Mod:info(filter)),
-    glc:handle(Mod, gre:make([{'a', 1},{'b', 2}], [list])),
+    gr_lc:handle(Mod, gr_e:make([{'a', 1},{'b', 2}], [list])),
     ?assertEqual(5, Mod:info(input)),
     ?assertEqual(4, Mod:info(filter)),
     ?assertEqual(1, Mod:info(output)),
@@ -338,13 +338,13 @@ allholds_op_test() ->
 
 anyholds_op_test() ->
     {compiled, Mod} = setup_query(testmod11,
-        glc:any([glc:eq(a, 1), glc:eq(b, 2)])),
-    glc:handle(Mod, gre:make([{'a', 2}], [list])),
-    glc:handle(Mod, gre:make([{'b', 1}], [list])),
+        gr_lc:any([gr_lc:eq(a, 1), gr_lc:eq(b, 2)])),
+    gr_lc:handle(Mod, gr_e:make([{'a', 2}], [list])),
+    gr_lc:handle(Mod, gr_e:make([{'b', 1}], [list])),
     ?assertEqual(2, Mod:info(input)),
     ?assertEqual(2, Mod:info(filter)),
-    glc:handle(Mod, gre:make([{'a', 1}], [list])),
-    glc:handle(Mod, gre:make([{'b', 2}], [list])),
+    gr_lc:handle(Mod, gr_e:make([{'a', 1}], [list])),
+    gr_lc:handle(Mod, gr_e:make([{'b', 2}], [list])),
     ?assertEqual(4, Mod:info(input)),
     ?assertEqual(2, Mod:info(filter)),
     done.
@@ -352,14 +352,14 @@ anyholds_op_test() ->
 with_function_test() ->
     Self = self(),
     {compiled, Mod} = setup_query(testmod12,
-        glc:with(glc:eq(a, 1), fun(Event) -> Self ! gre:fetch(a, Event) end)),
-    glc:handle(Mod, gre:make([{a,1}], [list])),
+        gr_lc:with(gr_lc:eq(a, 1), fun(Event) -> Self ! gr_e:fetch(a, Event) end)),
+    gr_lc:handle(Mod, gr_e:make([{a,1}], [list])),
     ?assertEqual(1, Mod:info(output)),
     ?assertEqual(1, receive Msg -> Msg after 0 -> notcalled end),
     done.
 
 union_error_test() ->
-    ?assertError(badarg, glc:union([glc:eq(a, 1)])),
+    ?assertError(badarg, gr_lc:union([gr_lc:eq(a, 1)])),
     done.
 
 -endif.

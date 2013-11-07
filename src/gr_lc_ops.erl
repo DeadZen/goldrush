@@ -1,5 +1,5 @@
 %% @doc Built in operators.
--module(glc_ops).
+-module(gr_lc_ops).
 
 -export([
     lt/2,
@@ -44,7 +44,7 @@ eq(Key, Term) when is_atom(Key) ->
 eq(Key, Term) ->
     erlang:error(badarg, [Key, Term]).
 
-%% @doc Test that a field value is greater than a term.
+%% @doc Test that a field value is gr_eater than a term.
 -spec gt(atom(), term()) -> op().
 gt(Key, Term) when is_atom(Key) ->
     {Key, '>', Term};
@@ -95,7 +95,7 @@ null(Result) ->
 %% Updating the output action of a query finalizes it. Attempting
 %% to use a finalized query to construct a new query will result
 %% in a `badarg' error.
--spec with(op(), fun((gre:event()) -> term())) -> op().
+-spec with(op(), fun((gr_e:event()) -> term())) -> op().
 with(Query, Fun) when is_function(Fun, 1) ->
     {with, Query, Fun};
 with(Query, Fun) ->
@@ -113,7 +113,7 @@ with(Query, Fun) ->
 %% a `badarg' error will be thrown.
 -spec union([op()]) -> op().
 union(Queries) ->
-    case [Query || Query <- Queries, glc_lib:onoutput(Query) =:= output] of
+    case [Query || Query <- Queries, gr_lc_lib:onoutput(Query) =:= output] of
         [] -> {union, Queries};
         [_|_] -> erlang:error(badarg, [Queries])
     end.

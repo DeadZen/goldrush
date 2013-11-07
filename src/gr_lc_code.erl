@@ -1,5 +1,5 @@
 %% @doc Code generation functions.
--module(glc_code).
+-module(gr_lc_code).
 
 -export([
     compile/2
@@ -128,7 +128,7 @@ abstract_query(Query) ->
 
 %% @private Return a list of expressions to apply a filter.
 %% @todo Allow mulitple functions to be specified using `with/2'.
--spec abstract_filter(glc_ops:op(), #state{}) -> [syntaxTree()].
+-spec abstract_filter(gr_lc_ops:op(), #state{}) -> [syntaxTree()].
 abstract_filter({with, Cond, Fun}, State) ->
     abstract_filter_(Cond,
         _OnMatch=fun(State2) ->
@@ -144,7 +144,7 @@ abstract_filter(Cond, State) ->
 %% to apply when the filter matches or fails to match. The state passed to the
 %% functions will be contain all variable bindings to previously accessed
 %% fields and parameters.
--spec abstract_filter_(glc_ops:op(), nextFun(), nextFun(), #state{}) ->
+-spec abstract_filter_(gr_lc_ops:op(), nextFun(), nextFun(), #state{}) ->
         syntaxTree().
 abstract_filter_({null, true}, OnMatch, _OnNomatch, State) ->
     OnMatch(State);
@@ -185,7 +185,7 @@ abstract_opfilter(Key, Opname, Value, OnMatch, OnNomatch, State) ->
 %% any of the conditions does not hold the evaluation is short circuted at that
 %% point. This means that the `OnNomatch' branch is executed once for each
 %% condition. The `OnMatch' branch is only executed once.
--spec abstract_all([glc_ops:op()], nextFun(), nextFun(), #state{}) ->
+-spec abstract_all([gr_lc_ops:op()], nextFun(), nextFun(), #state{}) ->
         [syntaxTree()].
 abstract_all([H|T], OnMatch, OnNomatch, State) ->
     abstract_filter_(H,
@@ -195,7 +195,7 @@ abstract_all([], OnMatch, _OnNomatch, State) ->
     OnMatch(State).
 
 %% @private
--spec abstract_any([glc_ops:op()], nextFun(), nextFun(), #state{}) ->
+-spec abstract_any([gr_lc_ops:op()], nextFun(), nextFun(), #state{}) ->
         [syntaxTree()].
 abstract_any([H|T], OnMatch, OnNomatch, State) ->
     abstract_filter_(H, OnMatch,
@@ -205,7 +205,7 @@ abstract_any([], _OnMatch, OnNomatch, State) ->
     OnNomatch(State).
 
 %% @private
--spec abstract_with(fun((gre:event()) -> term()), #state{}) -> [syntaxTree()].
+-spec abstract_with(fun((gr_e:event()) -> term()), #state{}) -> [syntaxTree()].
 abstract_with(Fun, State) when is_function(Fun, 1) ->
     abstract_getparam(Fun, fun(#state{event=Event, paramvars=Params}) ->
             {_, Fun2} = lists:keyfind(Fun, 1, Params),
@@ -231,7 +231,7 @@ abstract_getkey(Key, OnMatch, OnNomatch, #state{fields=Fields}=State) ->
 abstract_getkey_(Key, OnMatch, OnNomatch, #state{
         event=Event, fields=Fields}=State) ->
     [?erl:case_expr(
-        abstract_apply(gre, find, [?erl:atom(Key), Event]),
+        abstract_apply(gr_e, find, [?erl:atom(Key), Event]),
         [?erl:clause([
             ?erl:tuple([
                 ?erl:atom(true),
@@ -302,11 +302,11 @@ param_variable(Key) ->
 %% @private Generate a list of field variable names.
 %% Walk the query tree and generate a safe variable name string for each field
 %% that is accessed by the conditions in the query. Only allow alpha-numeric.
-%%-spec field_variables(glc_ops:op()) -> [{atom(), string()}].
+%%-spec field_variables(gr_lc_ops:op()) -> [{atom(), string()}].
 %%field_variables(Query) ->
 %%    lists:usort(field_variables_(Query)).
 
-%%-spec field_variables(glc_ops:op()) -> [{atom(), string()}].
+%%-spec field_variables(gr_lc_ops:op()) -> [{atom(), string()}].
 %%field_variables_({Key, '=', _Term}) ->
 %%    [{Key, field_variable(Key)}].
 

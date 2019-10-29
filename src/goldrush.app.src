@@ -4,5 +4,6 @@
     {registered, []},
     {applications, [kernel, stdlib, syntax_tools, compiler]},
     {mod, {gr_app, []}},
+    {licenses, ["ISC"]},
     {env, []}
 ]}.

@@ -4,5 +4,6 @@
     {registered, []},
     {applications, [kernel, stdlib, syntax_tools, compiler]},
     {mod, {gr_app, []}},
+    {licenses, ["Apache-2.0"]},
     {env, []}
 ]}.

@@ -1,29 +1,36 @@
 # See LICENSE for licensing information.
 
 DIALYZER = dialyzer
-REBAR = rebar
+REBAR = rebar3
+MIX = mix
 APPNAME = goldrush
 
 all: app
 
 app: deps
 	@$(REBAR) compile
+	@$(MIX) compile
 
 deps:
 	@$(REBAR) get-deps
+	@$(MIX) deps.get
 
 clean:
 	@$(REBAR) clean
+	@$(MIX) clean
 	rm -f test/*.beam
 	rm -f erl_crash.dump
 
-tests: clean app eunit ct
+tests: clean app eunit ct elixir
+
+elixir: 
+	@$(MIX) test
 
 eunit:
-	@$(REBAR) -C rebar.test.config eunit skip_deps=true
+	@$(REBAR) eunit skip_deps=true
 
 ct:
-	@$(REBAR) -C rebar.test.config ct skip_deps=true
+	@$(REBAR) ct skip_deps=true
 
 build-plt:
 	@$(DIALYZER) --build_plt --output_plt .$(APPNAME)_dialyzer.plt \

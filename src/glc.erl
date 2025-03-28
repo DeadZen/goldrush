@@ -647,6 +647,40 @@ events_test_() ->
                     ?assertEqual(2, Mod:info(output))
                 end
             },
+            {"opfilter both less than or equal operators test",
+                fun() ->
+                    % Test with '<=' operator (via glc:lte)
+                    {compiled, Mod1} = setup_query(testmod11c, glc:lte(a, 1)),
+                    glc:handle(Mod1, gre:make([{'a', 0}], [list])),
+                    ?assertEqual(1, Mod1:info(input)),
+                    ?assertEqual(0, Mod1:info(filter)),
+                    ?assertEqual(1, Mod1:info(output)),
+                    glc:handle(Mod1, gre:make([{'a', 1}], [list])),
+                    ?assertEqual(2, Mod1:info(input)),
+                    ?assertEqual(0, Mod1:info(filter)),
+                    ?assertEqual(2, Mod1:info(output)),
+                    glc:handle(Mod1, gre:make([{'a', 2}], [list])),
+                    ?assertEqual(3, Mod1:info(input)),
+                    ?assertEqual(1, Mod1:info(filter)),
+                    ?assertEqual(2, Mod1:info(output)),
+                    
+                    % Test with direct '=<' operator
+                    {compiled, Mod2} = setup_query(testmod11d, 
+                        glc_lib:reduce({a, '=<', 1})),
+                    glc:handle(Mod2, gre:make([{'a', 0}], [list])),
+                    ?assertEqual(1, Mod2:info(input)),
+                    ?assertEqual(0, Mod2:info(filter)),
+                    ?assertEqual(1, Mod2:info(output)),
+                    glc:handle(Mod2, gre:make([{'a', 1}], [list])),
+                    ?assertEqual(2, Mod2:info(input)),
+                    ?assertEqual(0, Mod2:info(filter)),
+                    ?assertEqual(2, Mod2:info(output)),
+                    glc:handle(Mod2, gre:make([{'a', 2}], [list])),
+                    ?assertEqual(3, Mod2:info(input)),
+                    ?assertEqual(1, Mod2:info(filter)),
+                    ?assertEqual(2, Mod2:info(output))
+                end
+            },
             {"allholds op test",
                 fun() ->
                     {compiled, Mod} = setup_query(testmod12,

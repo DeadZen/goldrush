@@ -369,6 +369,7 @@ abstract_filter_({Key, Op, Value}, OnMatch, OnNomatch, State)
               '=' -> '=:=';  
               '!=' -> '=/=';  
               '<=' -> '=<';
+              '=<' -> '=<';
               Op -> Op 
           end,
     abstract_opfilter(Key, Op2, Value, OnMatch, OnNomatch, State);

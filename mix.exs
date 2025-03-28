@@ -32,7 +32,6 @@ defmodule Goldrush.MixProject do
   defp description do
     """
     Goldrush is a small Erlang/Elixir event processing and monitoring application.
-    This is an Elixir wrapper around the Erlang Goldrush library.
     """
   end
 

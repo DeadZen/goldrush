@@ -3,19 +3,43 @@ defmodule GoldrushExTest do
   doctest GoldrushEx
 
   setup do
-    GoldrushEx.start()
+    # Ensure Goldrush is started
+    Application.ensure_all_started(:goldrush)
+    
+    on_exit(fn ->
+      # Clean up safely
+      try do
+        GoldrushEx.delete(:test_handler)
+      catch
+        _, _ -> :ok
+      end
+    end)
+    
     :ok
   end
 
   test "compiles a simple query" do
+    # Delete any existing handler to start fresh
+    try do
+      GoldrushEx.delete(:test_handler)
+    catch
+      _, _ -> :ok
+    end
+    
     query = GoldrushEx.eq(:test_field, "test_value")
     assert {:ok, :test_handler} = GoldrushEx.compile(:test_handler, query)
     
-    # Clean up
-    GoldrushEx.delete(:test_handler)
+    # No need to clean up here, it's handled in on_exit
   end
 
   test "handles an event" do
+    # Delete any existing handler to start fresh
+    try do
+      GoldrushEx.delete(:test_handler)
+    catch
+      _, _ -> :ok
+    end
+    
     query = GoldrushEx.with(
       GoldrushEx.eq(:test_field, "test_value"),
       fn _event -> :ok end
@@ -31,11 +55,17 @@ defmodule GoldrushExTest do
     assert GoldrushEx.output(:test_handler) == 1
     assert GoldrushEx.filter(:test_handler) == 0
     
-    # Clean up
-    GoldrushEx.delete(:test_handler)
+    # No need to clean up here, it's handled in on_exit
   end
 
   test "filters events" do
+    # Delete any existing handler to start fresh
+    try do
+      GoldrushEx.delete(:test_handler)
+    catch
+      _, _ -> :ok
+    end
+    
     query = GoldrushEx.with(
       GoldrushEx.eq(:test_field, "test_value"),
       fn _event -> :ok end
@@ -54,11 +84,17 @@ defmodule GoldrushExTest do
     assert GoldrushEx.output(:test_handler) == 1
     assert GoldrushEx.filter(:test_handler) == 1
     
-    # Clean up
-    GoldrushEx.delete(:test_handler)
+    # No need to clean up here, it's handled in on_exit
   end
 
   test "runs a job" do
+    # Delete any existing handler to start fresh
+    try do
+      GoldrushEx.delete(:test_handler)
+    catch
+      _, _ -> :ok
+    end
+    
     query = GoldrushEx.null(true)
     
     {:ok, :test_handler} = GoldrushEx.compile(:test_handler, query)
@@ -74,11 +110,17 @@ defmodule GoldrushExTest do
     assert GoldrushEx.job_input(:test_handler) == 1
     assert GoldrushEx.job_run(:test_handler) == 1
     
-    # Clean up
-    GoldrushEx.delete(:test_handler)
+    # No need to clean up here, it's handled in on_exit
   end
 
   test "resets counters" do
+    # Delete any existing handler to start fresh
+    try do
+      GoldrushEx.delete(:test_handler)
+    catch
+      _, _ -> :ok
+    end
+    
     query = GoldrushEx.null(true)
     
     {:ok, :test_handler} = GoldrushEx.compile(:test_handler, query)
@@ -96,11 +138,17 @@ defmodule GoldrushExTest do
     # Check counters again
     assert GoldrushEx.input(:test_handler) == 0
     
-    # Clean up
-    GoldrushEx.delete(:test_handler)
+    # No need to clean up here, it's handled in on_exit
   end
 
   test "stores and retrieves values" do
+    # Delete any existing handler to start fresh
+    try do
+      GoldrushEx.delete(:test_handler)
+    catch
+      _, _ -> :ok
+    end
+    
     query = GoldrushEx.null(true)
     store = [config: [threshold: 10]]
     
@@ -109,7 +157,6 @@ defmodule GoldrushExTest do
     # Get stored value
     assert {:ok, [threshold: 10]} = GoldrushEx.get(:test_handler, :config)
     
-    # Clean up
-    GoldrushEx.delete(:test_handler)
+    # No need to clean up here, it's handled in on_exit
   end
 end

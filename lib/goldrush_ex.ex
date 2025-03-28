@@ -11,6 +11,7 @@ defmodule GoldrushEx do
   """
   def start do
     _ = Application.start(:goldrush) # likely already started
+    _ = GoldrushEx.Plugin.start()
   end
 
   @doc """
@@ -44,7 +45,17 @@ defmodule GoldrushEx do
   `:ok`
   """
   def handle(module, event) do
-    :glc.handle(module, event)
+    # Process through plugins if available
+    processed_event = if Code.ensure_loaded?(GoldrushEx.Plugin) do
+      case GoldrushEx.Plugin.process_event(event) do
+        {:ok, new_event} -> new_event
+        {:skip, _reason} -> event  # Use original event if skipped
+      end
+    else
+      event
+    end
+    
+    :glc.handle(module, processed_event)
   end
 
   @doc """
@@ -61,7 +72,17 @@ defmodule GoldrushEx do
   `{execution_time, result}` where execution_time is in microseconds
   """
   def run(module, fun, event) do
-    :glc.run(module, fun, event)
+    # Process through plugins if available
+    processed_event = if Code.ensure_loaded?(GoldrushEx.Plugin) do
+      case GoldrushEx.Plugin.process_event(event) do
+        {:ok, new_event} -> new_event
+        {:skip, _reason} -> event  # Use original event if skipped
+      end
+    else
+      event
+    end
+    
+    :glc.run(module, fun, processed_event)
   end
 
   @doc """
@@ -92,7 +113,13 @@ defmodule GoldrushEx do
   `:ok`
   """
   def delete(module) do
-    :glc.delete(module)
+    try do
+      :glc.delete(module)
+    catch
+      :exit, {:noproc, _} -> :ok
+      :exit, {:normal, _} -> :ok
+      _, _ -> :ok
+    end
   end
 
   @doc """
@@ -202,4 +229,41 @@ defmodule GoldrushEx do
   
   @doc "Return a union of multiple queries."
   def union(queries), do: :glc.union(queries)
+  
+  @doc """
+  Creates a new event from a map or keyword list.
+  
+  ## Examples
+  
+      iex> GoldrushEx.new_event(level: :info, message: "Hello")
+      %GoldrushEx.Event{fields: %{level: :info, message: "Hello"}}
+  """
+  def new_event(fields) do
+    if Code.ensure_loaded?(GoldrushEx.Event) do
+      GoldrushEx.Event.new(fields)
+    else
+      fields
+    end
+  end
+  
+  @doc """
+  Creates a new query with the given conditions.
+  
+  ## Examples
+  
+      iex> GoldrushEx.new_query(level: :error)
+      {:level, :=, :error}
+  """
+  def new_query(conditions) do
+    if Code.ensure_loaded?(GoldrushEx.Query) do
+      GoldrushEx.Query.where(conditions)
+    else
+      case conditions do
+        [{field, value}] -> eq(field, value)
+        _ -> 
+          conditions = Enum.map(conditions, fn {field, value} -> eq(field, value) end)
+          all(conditions)
+      end
+    end
+  end
 end

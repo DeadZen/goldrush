@@ -73,6 +73,43 @@ defmodule GreEx do
     :gre.find(key, event)
   end
 
+
+  def get(key, event) do
+    get(key, event, nil)
+  end
+
+
+  @doc """
+  Gets the value of a field in an event, with an optional default value.
+ 
+  ## Parameters
+ 
+  - `key`: The field name
+  - `event`: The event to check
+  - `default`: The default value to return if the field is not found (default: nil)
+ 
+  ## Returns
+ 
+  The value of the field, or the default value if the field is not found
+ 
+  ## Examples
+ 
+      iex> event = GreEx.make([a: 1, b: 2])
+      iex> GreEx.get(:a, event)
+      1                
+      iex> GreEx.get(:c, event)
+      nil              
+      iex> GreEx.get(:c, event, :default)
+      :default
+  """
+  def get(key, event, default \\ nil) do
+    case find(key, event) do
+      {true, value} -> value
+      false -> default
+    end
+  end
+
+
   @doc """
   Gets the names of all fields in an event.
   

@@ -27,4 +27,5 @@ ebin
 *.swp
 .project
 log
+*.log
 .aider*

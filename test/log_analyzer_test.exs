@@ -1,6 +1,8 @@
-defmodule LogAnalyzerTest do
+defmodule Goldrush.LogAnalyzerTest do
   use ExUnit.Case
   import ExUnit.CaptureIO
+
+  alias Goldrush.LogAnalyzer
 
   setup do
     # Start the analyzer

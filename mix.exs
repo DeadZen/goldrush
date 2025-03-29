@@ -4,7 +4,7 @@ defmodule Goldrush.MixProject do
   def project do
     [
       app: :goldrush,
-      version: "0.2.1",
+      version: "0.2.2",
       licenses: ["Apache-2.0"],
       elixir: "~> 1.10",
       start_permanent: Mix.env() == :prod,
@@ -18,14 +18,17 @@ defmodule Goldrush.MixProject do
 
   def application do
     [
-      extra_applications: [:logger, :syntax_tools],
+      extra_applications: [:logger, :syntax_tools, :telemetry],
       mod: {:gr_app, []}
     ]
   end
 
   defp deps do
     [
-      {:ex_doc, "~> 0.24", only: :dev, runtime: false}
+      {:ex_doc, "~> 0.24", only: :dev, runtime: false},
+      {:telemetry, "~> 1.0"},
+      {:req, "~> 0.4", optional: true},
+      {:jason, "~> 1.4", optional: true}
     ]
   end
 

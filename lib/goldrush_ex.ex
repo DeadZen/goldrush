@@ -45,17 +45,26 @@ defmodule GoldrushEx do
   `:ok`
   """
   def handle(module, event) do
+    start_time = System.monotonic_time()
+    
     # Process through plugins if available
-    processed_event = if Code.ensure_loaded?(GoldrushEx.Plugin) do
-      case GoldrushEx.Plugin.process_event(event) do
+    processed_event = case GoldrushEx.Plugin.process_event(event) do
         {:ok, new_event} -> new_event
         {:skip, _reason} -> event  # Use original event if skipped
       end
+    
+    result = :glc.handle(module, processed_event)
+    end_time = System.monotonic_time()
+    
+    if :glc.output(module) > :glc.output(module) - 1 do
+      # Event was processed (not filtered)
+      GoldrushEx.Telemetry.emit_event_processed(module, processed_event, start_time, end_time)
     else
-      event
+      # Event was filtered
+      GoldrushEx.Telemetry.emit_event_filtered(module, processed_event, start_time, end_time)
     end
     
-    :glc.handle(module, processed_event)
+    result
   end
 
   @doc """
@@ -72,17 +81,18 @@ defmodule GoldrushEx do
   `{execution_time, result}` where execution_time is in microseconds
   """
   def run(module, fun, event) do
+    
     # Process through plugins if available
-    processed_event = if Code.ensure_loaded?(GoldrushEx.Plugin) do
-      case GoldrushEx.Plugin.process_event(event) do
+    processed_event = case GoldrushEx.Plugin.process_event(event) do
         {:ok, new_event} -> new_event
         {:skip, _reason} -> event  # Use original event if skipped
       end
-    else
-      event
-    end
     
-    :glc.run(module, fun, processed_event)
+    {execution_time, result} = :glc.run(module, fun, processed_event)
+    
+    GoldrushEx.Telemetry.emit_job_executed(module, processed_event, result, execution_time)
+    
+    {execution_time, result}
   end
 
   @doc """
@@ -239,11 +249,7 @@ defmodule GoldrushEx do
       %GoldrushEx.Event{fields: %{level: :info, message: "Hello"}}
   """
   def new_event(fields) do
-    if Code.ensure_loaded?(GoldrushEx.Event) do
-      GoldrushEx.Event.new(fields)
-    else
-      fields
-    end
+    GoldrushEx.Event.new(fields)
   end
   
   @doc """
@@ -255,15 +261,11 @@ defmodule GoldrushEx do
       {:level, :=, :error}
   """
   def new_query(conditions) do
-    if Code.ensure_loaded?(GoldrushEx.Query) do
-      GoldrushEx.Query.where(conditions)
-    else
       case conditions do
         [{field, value}] -> eq(field, value)
         _ -> 
           conditions = Enum.map(conditions, fn {field, value} -> eq(field, value) end)
           all(conditions)
       end
-    end
   end
 end

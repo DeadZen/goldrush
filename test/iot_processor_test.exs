@@ -2,6 +2,8 @@ defmodule IoTProcessorTest do
   use ExUnit.Case
   import ExUnit.CaptureIO
 
+  alias Goldrush.IoTProcessor
+
   setup do
     # Start the processor
     IoTProcessor.start()

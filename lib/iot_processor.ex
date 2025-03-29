@@ -1,4 +1,4 @@
-defmodule IoTProcessor do
+defmodule Goldrush.IoTProcessor do
   @moduledoc """
   A real-time IoT event processor using Goldrush.
   

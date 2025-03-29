@@ -1,4 +1,4 @@
-defmodule LogAnalyzer do
+defmodule Goldrush.LogAnalyzer do
   @moduledoc """
   A real-time log analyzer using Goldrush.
   
